@@ -90,14 +90,16 @@ class FacebookReporter:
                        'video_p75_watched_actions', 'video_p100_watched_actions',
                        'attribution_setting', 'objective', 'reach', 'impressions', 'frequency', 'account_currency',
                        'campaign_id', 'campaign_name', 'adset_name', 'adset_id', 'ad_name', 'ad_id',
-                       'ad_impression_actions', 'spend', 'unique_inline_link_clicks', 'actions']
+                       'ad_impression_actions', 'spend', 'unique_inline_link_clicks', 'actions', 'image_asset', 'video_assset']
 
         self.params = {
 
             'level': 'ad',
             'date_preset': 'last_30d',
             'time_increment': 1,
-            'use_unified_attribution_setting': True
+            'use_unified_attribution_setting': True,
+            'default_summary': True,
+            'summary': ['image_asset']
 
         }
         self.current_ads = []
@@ -209,8 +211,9 @@ class FacebookReporter:
         for i in range(len(campaigns)):
             self.params['breakdowns'] = breakdowns
             insights = self.get_insights_or_sleep(campaigns[i])
-            for insight in insights:
-                insight = dict(insight)
+            for y in range(len(insights)):
+                insight = dict(insights[i])
+                print(insight)
                 flag = False
                 for ad in self.current_ads:
                     if ad['ad_id'] == insight['ad_id']:
@@ -220,7 +223,7 @@ class FacebookReporter:
                 if not flag:
                     insight.update(self.get_ad_data_or_sleep(insight['ad_id']))
                 rows.append(insight)
-                print(f'Pulling dats for campaign, {i}/{len(campaigns)}')
+                print(f'Pulling dats for campaign, {i}/{len(campaigns)}, {y}/{len(insights)}')
                 try:
                     with open('test.json', 'w') as f:
                         f.write(json.dumps(rows))
