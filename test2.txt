@@ -1,6 +1,0 @@
-{'video_play_actions': [{'action_type': 'video_view', 'value': '25'}], 'video_p25_watched_actions': [{'action_type': 'video_view', 'value': '2'}], 'attribution_setting': '1d_view_7d_click', 'objective': 'CONVERSIONS', 'reach': '30', 'impressions': '30', 'frequency': '1', 'account_currency': 'EUR', 'campaign_id': '23847078972290319', 'campaign_name': 'SoU_Der Serienjunkie_[wioleta-daria]-[Wishlist]-[FB]', 'adset_name': '[M-U29]_[Männer]_[Generisch]_[Gesamt]_[U29]_[FB-Feed]', 'adset_id': '23847078974710319', 'ad_name': 'story-1_video_square_14s_variante_1', 'ad_id': <Ad> {
-    "creative": {
-        "id": "23847083218110319"
-    },
-    "id": "23847079725650319"
-}, 'spend': '0.23', 'unique_inline_link_clicks': '0', 'actions': [{'action_type': 'video_view', 'value': '2'}, {'action_type': 'page_engagement', 'value': '2'}, {'action_type': 'post_engagement', 'value': '2'}], 'date_start': '2021-03-24', 'date_stop': '2021-03-24', 'age': '25-34', 'gender': 'male'}
