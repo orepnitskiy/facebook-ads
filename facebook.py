@@ -90,7 +90,8 @@ class FacebookReporter:
                        'video_p75_watched_actions', 'video_p100_watched_actions',
                        'attribution_setting', 'objective', 'reach', 'impressions', 'frequency', 'account_currency',
                        'campaign_id', 'campaign_name', 'adset_name', 'adset_id', 'ad_name', 'ad_id',
-                       'ad_impression_actions', 'spend', 'unique_inline_link_clicks', 'actions', 'image_asset', 'video_assset']
+                       'ad_impression_actions', 'spend', 'unique_inline_link_clicks', 'actions'
+                       ]
 
         self.params = {
 
@@ -99,7 +100,6 @@ class FacebookReporter:
             'time_increment': 1,
             'use_unified_attribution_setting': True,
             'default_summary': True,
-            'summary': ['image_asset']
 
         }
         self.current_ads = []
@@ -112,10 +112,8 @@ class FacebookReporter:
 
                 ad = Ad(ad)
 
-                ad.api_get(fields=[Ad.Field.creative])
                 creative = AdCreative(ad.api_get(fields=[Ad.Field.creative])['creative']['id'])
-                fields = [AdCreative.Field.call_to_action_type, AdCreative.Field.object_story_spec,
-                          AdCreative.Field.image_hash]
+                fields = [AdCreative.Field.call_to_action_type, AdCreative.Field.object_story_spec]
 
                 creative.api_get(fields=fields)
                 creative = dict(creative)
@@ -131,10 +129,7 @@ class FacebookReporter:
                     ad_data['call_to_action_type'] = call_to_action['type']
                     ad_data['headline'] = creative['object_story_spec']['video_data']['title']
                     ad_data['description'] = creative['object_story_spec']['video_data']['message']
-                    image_hash = creative['object_story_spec']['video_data']['image_hash']
-                    images = self.ad_account.get_ad_images(params={'hashes': [image_hash]},
-                                                           fields=[AdImage.Field.name])
-                    ad_data['image_name'] = images[0]['name']
+
                     video = AdVideo(creative['object_story_spec']['video_data']['video_id'])
                     ad_data['video_name'] = video.api_get(fields=[AdVideo.Field.title])['title']
                 except KeyError:
@@ -209,6 +204,7 @@ class FacebookReporter:
         for campaign in self.get_campaigns_or_sleep():
             campaigns.append(campaign)
         for i in range(len(campaigns)):
+
             self.params['breakdowns'] = breakdowns
             insights = self.get_insights_or_sleep(campaigns[i])
             for y in range(len(insights)):
