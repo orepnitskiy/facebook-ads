@@ -203,9 +203,12 @@ class FacebookReporter:
 
     def generate_report(self, breakdowns):
         rows = []
+        campaigns = []
         for campaign in self.get_campaigns_or_sleep():
+            campaigns.append(campaign)
+        for i in range(len(campaigns)):
             self.params['breakdowns'] = breakdowns
-            insights = self.get_insights_or_sleep(campaign)
+            insights = self.get_insights_or_sleep(campaigns[i])
             for insight in insights:
                 insight = dict(insight)
                 flag = False
@@ -217,6 +220,7 @@ class FacebookReporter:
                 if not flag:
                     insight.update(self.get_ad_data_or_sleep(insight['ad_id']))
                 rows.append(insight)
+                print(f'Pulling dats for campaign, {i}/{len(campaigns)}')
                 try:
                     with open('test.json', 'w') as f:
                         f.write(json.dumps(rows))
@@ -229,7 +233,7 @@ class FacebookReporter:
 
 
 if __name__ == "__main__":
-    FacebookReporter().generate_report(['region'])
+    #FacebookReporter().generate_report(['region'])
     FacebookReporter().generate_report(['age', 'gender'])
     FacebookReporter().generate_report(['impression_device', 'device_platform', 'platform_position',
                                         'publisher_platform'])
