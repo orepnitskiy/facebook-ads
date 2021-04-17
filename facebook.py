@@ -5,12 +5,13 @@ import os
 import time
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adcreative import AdCreative
-from facebook_business.adobjects.adimage import AdImage
 from facebook_business.adobjects.adreportrun import AdReportRun
 from facebook_business.adobjects.advideo import AdVideo
 from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.exceptions import FacebookRequestError
+
+BASE_DIR = ''
 
 
 class CSVGenerator:
@@ -24,6 +25,12 @@ class CSVGenerator:
                             'call_to_action_type', 'image_name', 'video_name', 'url_parameters', 'objective']
 
     def convert_rows(self, rows, csv_fields):
+        """
+
+        :param rows:
+        :param csv_fields:
+        :return:
+        """
         row_keys_to_delete = []
         for i in range(len(rows)):
             for row_key in list(rows[i]):
@@ -40,7 +47,7 @@ class CSVGenerator:
                 elif row_key == 'date_start':
                     rows[i]['day'] = rows[i][row_key]
                 elif row_key in ['video_p25_watched_actions', 'video_p50_watched_actions',
-                            'video_p75_watched_actions', 'video_p100_watched_actions']:
+                                 'video_p75_watched_actions', 'video_p100_watched_actions']:
                     try:
                         rows[i][row_key] = rows[i][row_key][0]['value']
                     except TypeError:
@@ -59,6 +66,12 @@ class CSVGenerator:
         return rows
 
     def generate_report(self, rows, report_breakdowns):
+        '''
+
+        :param rows:
+        :param report_breakdowns:
+        :return:
+        '''
         csv_fields = self.base_fields
         for breakdown in report_breakdowns:
             csv_fields.append(breakdown)
@@ -72,7 +85,14 @@ class CSVGenerator:
 
     @staticmethod
     def create_csv(output_filename, fieldnames, output_rows):
-        with open(os.path.join(output_filename), 'w') as csv_file:
+        """
+        Create CSV from JSON rows
+        :param output_filename:
+        :param fieldnames:
+        :param output_rows:
+        :return:
+        """
+        with open(os.path.join(BASE_DIR, output_filename), 'w') as csv_file:
             output_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             output_writer.writeheader()
             for row in output_rows:
@@ -105,6 +125,11 @@ class FacebookReporter:
         self.current_ads = []
 
     def get_ad_data_or_sleep(self, ad):
+        """
+        Get needed data for ads or sleep
+        :param ad:
+        :return:
+        """
         while True:
             ad_data = {'ad_id': ad}
 
@@ -174,7 +199,8 @@ class FacebookReporter:
             try:
                 insights = campaign.get_insights(fields=self.fields, params=self.params, is_async=True)
                 insights.api_get()
-                while insights[AdReportRun.Field.async_status] != 'Job Completed' or insights[AdReportRun.Field.async_percent_completion] < 100:
+                while insights[AdReportRun.Field.async_status] != 'Job Completed' or insights[
+                    AdReportRun.Field.async_percent_completion] < 100:
                     time.sleep(1)
                     insights.api_get()
                     print(insights[AdReportRun.Field.async_percent_completion])
@@ -209,7 +235,6 @@ class FacebookReporter:
             insights = self.get_insights_or_sleep(campaigns[i])
             for y in range(len(insights)):
                 insight = dict(insights[i])
-                print(insight)
                 flag = False
                 for ad in self.current_ads:
                     if ad['ad_id'] == insight['ad_id']:
@@ -221,18 +246,13 @@ class FacebookReporter:
                 rows.append(insight)
                 print(f'Pulling dats for campaign, {i}/{len(campaigns)}, {y}/{len(insights)}')
                 try:
-                    with open('test.json', 'w') as f:
-                        f.write(json.dumps(rows))
+                    json.dumps(rows)
                 except:
-                    with open('test2.txt', 'w') as f:
-                        f.write(str(insight))
                     rows.remove(insight)
-
             CSVGenerator().generate_report(rows, breakdowns)
 
 
 if __name__ == "__main__":
-    #FacebookReporter().generate_report(['region'])
     FacebookReporter().generate_report(['age', 'gender'])
     FacebookReporter().generate_report(['impression_device', 'device_platform', 'platform_position',
                                         'publisher_platform'])
