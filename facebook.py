@@ -11,7 +11,7 @@ from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.exceptions import FacebookRequestError
 
-BASE_DIR = ''
+BASE_DIR = os.path.join(os.getcwd(), 'automated extraction')
 
 
 class CSVGenerator:
@@ -26,7 +26,7 @@ class CSVGenerator:
 
     def convert_rows(self, rows, csv_fields):
         """
-
+        Convert rows from Facebook API to needed format
         :param rows:
         :param csv_fields:
         :return:
@@ -66,12 +66,9 @@ class CSVGenerator:
         return rows
 
     def generate_report(self, rows, report_breakdowns):
-        '''
-
-        :param rows:
-        :param report_breakdowns:
-        :return:
-        '''
+        """
+        Generate CSV based on breakdowns and rows provided
+        """
         csv_fields = self.base_fields
         for breakdown in report_breakdowns:
             csv_fields.append(breakdown)
@@ -87,10 +84,6 @@ class CSVGenerator:
     def create_csv(output_filename, fieldnames, output_rows):
         """
         Create CSV from JSON rows
-        :param output_filename:
-        :param fieldnames:
-        :param output_rows:
-        :return:
         """
         with open(os.path.join(BASE_DIR, output_filename), 'w') as csv_file:
             output_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -172,29 +165,14 @@ class FacebookReporter:
 
         return ad_data
 
-    def get_ads_or_sleep(self):
-        ads_list = []
-        while True:
-            try:
-                account_ads = self.ad_account.get_ads(fields=[Ad.Field.id])
-                for ad in account_ads:
-                    ads_list.append(dict(ad))
-            except FacebookRequestError:
-                time.sleep(1200)
-            else:
-                break
-        return ads_list
 
-    def generate_ad_data(self):
-        ads = []
-        ads_data = self.get_ads_or_sleep()
-        for ad in ads_data:
-            ad_data = self.get_ad_data_or_sleep(ad)
-
-            ads.append(ad_data)
-        return ads
 
     def get_insights_or_sleep(self, campaign):
+        """
+        Collect insights for campaign or sleep for time to not trigger Facebook API limits
+        :param campaign:
+        :return:
+        """
         while True:
             try:
                 insights = campaign.get_insights(fields=self.fields, params=self.params, is_async=True)
@@ -234,7 +212,7 @@ class FacebookReporter:
             self.params['breakdowns'] = breakdowns
             insights = self.get_insights_or_sleep(campaigns[i])
             for y in range(len(insights)):
-                insight = dict(insights[i])
+                insight = dict(insights[y])
                 flag = False
                 for ad in self.current_ads:
                     if ad['ad_id'] == insight['ad_id']:
